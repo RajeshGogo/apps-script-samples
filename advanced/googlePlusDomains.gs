@@ -19,13 +19,18 @@
  * Google+ profile.
  */
 function getProfile() {
-  var userId = 'me';
-  var profile = PlusDomains.People.get(userId);
+  const userId = 'me';
+  try {
+    const profile = PlusDomains.People.get(userId);
 
-  Logger.log('ID: %s', profile.id);
-  Logger.log('Display name: %s', profile.displayName);
-  Logger.log('Image URL: %s', profile.image.url);
-  Logger.log('Profile URL: %s', profile.url);
+    Logger.log('ID: %s', profile.id);
+    Logger.log('Display name: %s', profile.displayName);
+    Logger.log('Image URL: %s', profile.image.url);
+    Logger.log('Profile URL: %s', profile.url);
+  } catch (err) {
+    // TODO (developer)- Handle exception from the  API
+    Logger.log('Failed with error %s', err.message);
+  }
 }
 // [END apps_script_plus_domains_profile]
 
@@ -35,12 +40,17 @@ function getProfile() {
  * within your G Suite domain.
  */
 function createCircle() {
-  var userId = 'me';
-  var circle = PlusDomains.newCircle();
-  circle.displayName = 'Tech support';
+  const userId = 'me';
+  try {
+    let circle = PlusDomains.newCircle();
+    circle.displayName = 'Tech support';
 
-  circle = PlusDomains.Circles.insert(circle, userId);
-  Logger.log('Created "Tech support" circle with id: ' + circle.id);
+    circle = PlusDomains.Circles.insert(circle, userId);
+    Logger.log('Created "Tech support" circle with id: ' + circle.id);
+  } catch (err) {
+    // TODO (developer)- Handle exception from the  API
+    Logger.log('Failed with error %s', err.message);
+  }
 }
 // [END apps_script_plus_domains_circle]
 
@@ -51,19 +61,21 @@ function createCircle() {
  * Activities.get() method to read the full details of a post.
  */
 function getPosts() {
-  var userId = 'me';
-  var pageToken;
-  var posts;
+  const userId = 'me';
+  let pageToken;
+  let posts;
   do {
     posts = PlusDomains.Activities.list(userId, 'user', {
       maxResults: 100,
       pageToken: pageToken
     });
-    if (posts.items) {
-      for (var i = 0; i < posts.items.length; i++) {
-        var post = posts.items[i];
-        Logger.log('ID: %s, Content: %s', post.id, post.object.content);
-      }
+    if (!posts.items) {
+      Logger.log('No result found');
+      return;
+    }
+    // Print the id and object content
+    for (const post of posts.items) {
+      Logger.log('ID: %s, Content: %s', post.id, post.object.content);
     }
     pageToken = posts.nextPageToken;
   } while (pageToken);
@@ -76,8 +88,8 @@ function getPosts() {
  * to all users within your G Suite domain.
  */
 function createPost() {
-  var userId = 'me';
-  var post = {
+  const userId = 'me';
+  let post = {
     object: {
       originalContent: 'Happy Monday! #caseofthemondays'
     },
@@ -88,8 +100,12 @@ function createPost() {
       domainRestricted: true
     }
   };
-
-  post = PlusDomains.Activities.insert(post, userId);
-  Logger.log('Post created with URL: %s', post.url);
+  try {
+    post = PlusDomains.Activities.insert(post, userId);
+    Logger.log('Post created with URL: %s', post.url);
+  } catch (err) {
+    // TODO (developer)- Handle exception from the  API
+    Logger.log('Failed with error %s', err.message);
+  }
 }
 // [END apps_script_plus_domains_create_post]

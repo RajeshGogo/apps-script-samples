@@ -19,20 +19,19 @@
  * in the user's Google+ circles.
  */
 function getPeople() {
-  var userId = 'me';
-  var people;
-  var pageToken;
+  const userId = 'me';
+  let people;
+  let pageToken = null;
   do {
     people = Plus.People.list(userId, 'visible', {
       pageToken: pageToken
     });
-    if (people.items) {
-      for (var i = 0; i < people.items.length; i++) {
-        var person = people.items[i];
-        Logger.log(person.displayName);
-      }
-    } else {
+    if (!people.items) {
       Logger.log('No people in your visible circles.');
+      return;
+    }
+    for (const person of people.items) {
+      Logger.log(person.displayName);
     }
     pageToken = people.nextPageToken;
   } while (pageToken);
@@ -46,29 +45,26 @@ function getPeople() {
  * made on the post.
  */
 function getPosts() {
-  var userId = 'me';
-  var posts;
-  var pageToken;
+  const userId = 'me';
+  let posts;
+  let pageToken = null;
   do {
     posts = Plus.Activities.list(userId, 'public', {
       maxResults: 10,
       pageToken: pageToken
     });
-    if (posts.items) {
-      for (var i = 0; i < posts.items.length; i++) {
-        var post = posts.items[i];
-        Logger.log(post.title);
-        var comments = Plus.Comments.list(post.id);
-        if (comments.items) {
-          for (var j = 0; j < comments.items.length; j++) {
-            var comment = comments.items[j];
-            Logger.log(comment.actor.displayName + ': ' +
-                comment.object.content);
-          }
+    if (!posts.items) {
+      Logger.log('No posts found.');
+    }
+    for (const post of posts.items) {
+      Logger.log(post.title);
+      const comments = Plus.Comments.list(post.id);
+      if (comments.items) {
+        for (const comment of comments.items) {
+          Logger.log(comment.actor.displayName + ': ' +
+            comment.object.content);
         }
       }
-    } else {
-      Logger.log('No posts found.');
     }
     pageToken = posts.pageToken;
   } while (pageToken);
